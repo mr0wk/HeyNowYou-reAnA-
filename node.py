@@ -1,7 +1,12 @@
+from enums import NodeColor, NodeType
+
+
 class Node:
-    def __init__(self, x, y):
+    def __init__(self, x: int, y: int, type: NodeType, color: NodeColor):
         self.x = x
         self.y = y
+        self.type = type
+        self.color = color
 
     def calculate_g_cost(self, start_node):
         # Calculate the g cost from the start node to this node

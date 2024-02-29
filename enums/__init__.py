@@ -1,1 +1,1 @@
-from .color_type import ColorType
+from .enums import NodeColor, NodeType

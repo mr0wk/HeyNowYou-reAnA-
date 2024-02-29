@@ -1,12 +1,10 @@
 import click
 import pygame
 
-from enums import ColorType
-from grid import Grid
+from enums import NodeColor
+from visualizer import Visualizer
 
-STARTING_POINT_COORDINATES = ()
-END_POINT_COORDINATES = ()
-CELL_COLOR = ColorType.STARTING_POINT.value
+CELL_COLOR = NodeColor.STARTING_POINT.value
 SCREEN = None
 GRID = None
 
@@ -51,39 +49,30 @@ def reset() -> None:
     """
     global CELL_COLOR, STARTING_POINT_COORDINATES, END_POINT_COORDINATES, SCREEN, GRID, CELL_COLOR
     SCREEN.fill((0, 0, 0))
-    GRID.draw()
+    GRID.draw_grid()
     STARTING_POINT_COORDINATES = ()
     END_POINT_COORDINATES = ()
-    CELL_COLOR = ColorType.STARTING_POINT.value
+    CELL_COLOR = NodeColor.STARTING_POINT.value
 
 
 def handle_key_event(event):
-    """
-    Handles key events and performs corresponding actions based on the key pressed.
-
-    Parameters:
-        event (pygame.event.Event): The key event to handle.
-
-    Returns:
-        None
-    """
-    global CELL_COLOR, STARTING_POINT_COORDINATES, END_POINT_COORDINATES
+    global CELL_COLOR
 
     if event.key == pygame.K_r:
         reset()
     elif event.key == pygame.K_o:
-        CELL_COLOR = ColorType.OBSTACLE.value
+        CELL_COLOR = NodeColor.OBSTACLE.value
     elif event.key == pygame.K_s:
-        CELL_COLOR = ColorType.STARTING_POINT.value
+        CELL_COLOR = NodeColor.STARTING_POINT.value
     elif event.key == pygame.K_e:
-        CELL_COLOR = ColorType.END_POINT.value
+        CELL_COLOR = NodeColor.END_POINT.value
 
 
 @click.command()
 @click.option("--cell_size", default=10, help="Size of each cell in pixels")
 @click.option("--num_cells", default=10, help="Number of cells in the grid")
 def main(cell_size, num_cells):
-    global STARTING_POINT_COORDINATES, END_POINT_COORDINATES, SCREEN, GRID
+    global SCREEN, GRID
     offset = 10
 
     pygame.init()
@@ -92,9 +81,9 @@ def main(cell_size, num_cells):
     height = width
     SCREEN = pygame.display.set_mode((width, height))
     clock = pygame.time.Clock()
-    GRID = Grid(SCREEN, offset, cell_size, num_cells)
+    GRID = Visualizer(SCREEN, offset, cell_size, num_cells)
 
-    GRID.draw()
+    GRID.draw_grid()
 
     running = True
     while running:
@@ -109,26 +98,25 @@ def main(cell_size, num_cells):
             x, y = get_cell_coordinates(offset, cell_size)
 
             # TODO: Refactor and separate it into a function
-            if CELL_COLOR == ColorType.STARTING_POINT.value:
+            if CELL_COLOR == NodeColor.STARTING_POINT.value:
                 if STARTING_POINT_COORDINATES == ():
-                    STARTING_POINT_COORDINATES = (x, y)
-                    GRID.color_cell(
+                    GRID.mark_node(
                         STARTING_POINT_COORDINATES[0],
                         STARTING_POINT_COORDINATES[1],
                         CELL_COLOR,
                     )
-            elif CELL_COLOR == ColorType.END_POINT.value:
+            elif CELL_COLOR == NodeColor.END_POINT.value:
                 if END_POINT_COORDINATES == ():
                     END_POINT_COORDINATES = (x, y)
-                    GRID.color_cell(
+                    GRID.mark_node(
                         END_POINT_COORDINATES[0], END_POINT_COORDINATES[1], CELL_COLOR
                     )
-            elif CELL_COLOR == ColorType.OBSTACLE.value:
+            elif CELL_COLOR == NodeColor.OBSTACLE.value:
                 if (x, y) != STARTING_POINT_COORDINATES and (
                     x,
                     y,
                 ) != END_POINT_COORDINATES:
-                    GRID.color_cell(x, y, CELL_COLOR)
+                    GRID.mark_node(x, y, CELL_COLOR)
 
         pygame.display.flip()
         clock.tick(60)
